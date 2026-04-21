@@ -4,16 +4,59 @@
     <meta charset="UTF-8">
     <title>Справка КС-3 №{{ act.number }}</title>
     <style>
-        body { font-family: "Times New Roman", Times, serif; font-size: 14px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .title { font-weight: bold; font-size: 16px; margin: 10px 0; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #000; padding: 5px 8px; text-align: left; }
-        th { background-color: #f0f0f0; text-align: center; }
-        .info-table { width: 100%; margin-bottom: 20px; }
-        .info-table td { border: none; padding: 3px 5px; }
-        .total-row { font-weight: bold; }
-        .signature { margin-top: 40px; }
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        body { 
+            font-family: "Times New Roman", Times, serif; 
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px; 
+        }
+        .title { 
+            font-weight: bold; 
+            font-size: 14px; 
+            margin: 10px 0; 
+            text-transform: uppercase;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0; 
+        }
+        th, td { 
+            border: 1px solid #000; 
+            padding: 4px 6px; 
+            text-align: left; 
+            font-size: 11px;
+        }
+        th { 
+            background-color: #f0f0f0; 
+            text-align: center; 
+            font-weight: bold;
+        }
+        .info-table { 
+            width: 100%; 
+            margin-bottom: 20px; 
+        }
+        .info-table td { 
+            border: none; 
+            padding: 3px 5px; 
+        }
+        .total-row { 
+            font-weight: bold; 
+        }
+        .signature { 
+            margin-top: 40px; 
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-size: 14px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -24,7 +67,7 @@
 
     <table class="info-table">
         <tr>
-            <td><strong>Заказчик:</strong></td>
+            <td style="width: 30%;"><strong>Заказчик:</strong></td>
             <td>{{ contractor.name }}</td>
         </tr>
         <tr>
@@ -37,7 +80,7 @@
         </tr>
         <tr>
             <td><strong>Договор:</strong></td>
-            <td>№ {{ contract.number }} от {{ contract.date|date:"d.m.Y" }}</td>
+            <td>№ {{ act.contract.number }} от {{ act.contract.date|date:"d.m.Y" }}</td>
         </tr>
         <tr>
             <td><strong>Объект:</strong></td>
