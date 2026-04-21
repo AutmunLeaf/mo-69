@@ -1,0 +1,202 @@
+[
+  {
+    "model": "acts.contractor",
+    "pk": 1,
+    "fields": {
+      "name": "ООО «СтройМонтаж»",
+      "inn": "7701234567",
+      "kpp": "770101001",
+      "legal_address": "г. Москва, ул. Строителей, д. 10",
+      "actual_address": "г. Москва, ул. Строителей, д. 10",
+      "director_name": "Иванов Иван Иванович",
+      "phone": "+7 (495) 123-45-67",
+      "email": "info@stroymontazh.ru"
+    }
+  },
+  {
+    "model": "acts.contractor",
+    "pk": 2,
+    "fields": {
+      "name": "АО «ДорСтрой»",
+      "inn": "7702345678",
+      "kpp": "770201001",
+      "legal_address": "г. Москва, ш. Дмитровское, д. 5",
+      "actual_address": "г. Москва, ш. Дмитровское, д. 5",
+      "director_name": "Петров Петр Петрович",
+      "phone": "+7 (495) 987-65-43",
+      "email": "zakaz@dorstroi.ru"
+    }
+  },
+  {
+    "model": "acts.object",
+    "pk": 1,
+    "fields": {
+      "name": "Реконструкция моста через р. Москву на 25 км МКАД",
+      "code": "OBJ-2024-001",
+      "address": "Москва, МКАД, 25-й километр",
+      "created_at": "2024-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "acts.object",
+    "pk": 2,
+    "fields": {
+      "name": "Устройство дорожной одежды на подъезде к аэропорту",
+      "code": "OBJ-2024-002",
+      "address": "Московская обл., г. Химки",
+      "created_at": "2024-02-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "acts.worktype",
+    "pk": 1,
+    "fields": {
+      "name": "Земляные работы",
+      "unit": "м³"
+    }
+  },
+  {
+    "model": "acts.worktype",
+    "pk": 2,
+    "fields": {
+      "name": "Устройство бетонных оснований",
+      "unit": "м³"
+    }
+  },
+  {
+    "model": "acts.worktype",
+    "pk": 3,
+    "fields": {
+      "name": "Арматурные работы",
+      "unit": "т"
+    }
+  },
+  {
+    "model": "acts.worktype",
+    "pk": 4,
+    "fields": {
+      "name": "Асфальтобетонное покрытие",
+      "unit": "м²"
+    }
+  },
+  {
+    "model": "acts.contract",
+    "pk": 1,
+    "fields": {
+      "number": "СМ-24/05 от 15.01.2024",
+      "date": "2024-01-15",
+      "contractor": 1,
+      "object": 1,
+      "amount": "15000000.00",
+      "start_date": "2024-01-20",
+      "end_date": "2024-12-31",
+      "created_at": "2024-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "acts.contract",
+    "pk": 2,
+    "fields": {
+      "number": "ДС-24/12 от 20.02.2024",
+      "date": "2024-02-20",
+      "contractor": 2,
+      "object": 2,
+      "amount": "8500000.00",
+      "start_date": "2024-03-01",
+      "end_date": "2024-11-30",
+      "created_at": "2024-02-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "acts.act",
+    "pk": 1,
+    "fields": {
+      "number": "КС-2 № 1",
+      "date": "2024-03-31",
+      "contract": 1,
+      "object": 1,
+      "period_start": "2024-03-01",
+      "period_end": "2024-03-31",
+      "status": "approved",
+      "total_amount": "2450000.00",
+      "nds_rate": "20.00",
+      "notes": "Работы выполнены в полном объеме",
+      "created_at": "2024-03-31T10:00:00Z",
+      "updated_at": "2024-03-31T10:00:00Z"
+    }
+  },
+  {
+    "model": "acts.actitem",
+    "pk": 1,
+    "fields": {
+      "act": 1,
+      "work_type": 1,
+      "number": 1,
+      "name": "Земляные работы",
+      "unit": "м³",
+      "quantity": "1000.00",
+      "price": "450.00",
+      "total": "450000.00"
+    }
+  },
+  {
+    "model": "acts.actitem",
+    "pk": 2,
+    "fields": {
+      "act": 1,
+      "work_type": 2,
+      "number": 2,
+      "name": "Устройство бетонных оснований",
+      "unit": "м³",
+      "quantity": "100.00",
+      "price": "12500.00",
+      "total": "1250000.00"
+    }
+  },
+  {
+    "model": "acts.actitem",
+    "pk": 3,
+    "fields": {
+      "act": 1,
+      "work_type": 3,
+      "number": 3,
+      "name": "Арматурные работы",
+      "unit": "т",
+      "quantity": "15.00",
+      "price": "35000.00",
+      "total": "525000.00"
+    }
+  },
+  {
+    "model": "acts.act",
+    "pk": 2,
+    "fields": {
+      "number": "КС-2 № 2",
+      "date": "2024-04-30",
+      "contract": 1,
+      "object": 1,
+      "period_start": "2024-04-01",
+      "period_end": "2024-04-30",
+      "status": "draft",
+      "total_amount": "850000.00",
+      "nds_rate": "20.00",
+      "notes": "На согласовании",
+      "created_at": "2024-04-30T10:00:00Z",
+      "updated_at": "2024-04-30T10:00:00Z"
+    }
+  },
+  {
+    "model": "acts.actitem",
+    "pk": 4,
+    "fields": {
+      "act": 2,
+      "work_type": 4,
+      "number": 1,
+      "name": "Асфальтобетонное покрытие",
+      "unit": "м²",
+      "quantity": "1000.00",
+      "price": "850.00",
+      "total": "850000.00"
+    }
+  }
+]
