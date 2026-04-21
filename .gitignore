@@ -4,53 +4,44 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.py~
-*.py.class
-*.py.backup
-*.swp
-*.swo
 
 # Database
-*.sqlite3
-*.db
+db.sqlite3
+
+# Environment
+.env
+.env.local
+*.env.*
 
 # Dependencies
-venv/
 .venv/
-env/
-ENV/
-.ENV/
+venv/
 pip-log.txt
 pipenv.lock
-Pipfile.lock
-requirements-local.txt
-requirements-dev.txt
-*.egg-info/
-.eggs/
 
-# Django specific
+# Logs
 *.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-media/
-staticfiles/
-.env
 
 # Coverage
 .coverage
 coverage/
 htmlcov/
-.coverage.*
+
+# Temporary files
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
+*.sublime-project
+*.sublime-workspace
 
-# OS
-.DS_Store
-Thumbs.db
+# Build and distribution
+build/
+dist/
+*.egg-info/
 ```
