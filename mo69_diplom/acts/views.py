@@ -114,12 +114,14 @@ def generate_ks2_pdf(request, pk):
     """
     act = get_object_or_404(Act, pk=pk)
     items = act.items.filter(is_deleted=False)
+    total_sum = sum(item.total for item in items)
     
     html = render_to_string('acts/ks2_template.html', {
         'act': act,
         'items': items,
         'contractor': act.contract.contractor,
         'object': act.object,
+        'total_sum': total_sum,
     })
     
     response = HttpResponse(content_type='application/pdf')
@@ -145,12 +147,14 @@ def generate_ks3_pdf(request, pk):
     """
     act = get_object_or_404(Act, pk=pk)
     items = act.items.filter(is_deleted=False)
+    total_sum = sum(item.total for item in items)
     
     html = render_to_string('acts/ks3_template.html', {
         'act': act,
         'items': items,
         'contractor': act.contract.contractor,
         'object': act.object,
+        'total_sum': total_sum,
     })
     
     response = HttpResponse(content_type='application/pdf')
@@ -179,9 +183,13 @@ def generate_ks2_xml_file(request, pk):
     
     xml_content = generate_ks2_xml(act, items)
     
+    # Валидация
+    is_valid, message = validate_xml(xml_content)
+    
     response = HttpResponse(xml_content, content_type='application/xml')
     response['Content-Disposition'] = f'attachment; filename="KS-2_{act.number}.xml"'
     response.charset = 'windows-1251'
+    response['X-XML-Validated'] = str(is_valid)
     return response
 
 
@@ -195,9 +203,13 @@ def generate_ks3_xml_file(request, pk):
     
     xml_content = generate_ks3_xml(act, items)
     
+    # Валидация
+    is_valid, message = validate_xml(xml_content)
+    
     response = HttpResponse(xml_content, content_type='application/xml')
     response['Content-Disposition'] = f'attachment; filename="KS-3_{act.number}.xml"'
     response.charset = 'windows-1251'
+    response['X-XML-Validated'] = str(is_valid)
     return response
 
 

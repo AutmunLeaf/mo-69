@@ -1,273 +1,142 @@
 """
 Генератор XML файлов для форм КС-2 и КС-3
 Соответствует Приказу ФНС России № ЕД-7-26/691
+Кодировка: Windows-1251
 """
 
-import uuid
+from xml.etree.ElementTree import Element, SubElement, tostring
 from datetime import datetime
-from lxml import etree
+import uuid
 
 
 def generate_ks2_xml(act, items):
     """
-    Генерация XML для КС-2 по Приказу ФНС № ЕД-7-26/691
-    
-    Args:
-        act: объект модели Act
-        items: queryset объектов ActItem
-    
-    Returns:
-        bytes: XML контент в кодировке Windows-1251
+    Генерация XML для формы КС-2
     """
-    # Создаем корневой элемент
-    root = etree.Element(
-        "Файл",
-        xmlns="http://www.nalog.ru/edocs/ks2",
-        ИдФайл=f"KS2-{uuid.uuid4().hex[:10].upper()}",
-        ВерсПрог="5.2",
-        ВерсФорм="5.0"
-    )
+    # Корневой элемент
+    root = Element('Файл')
+    root.set('ИдФайл', f"KS2-{act.id}-{uuid.uuid4().hex[:8].upper()}")
+    root.set('ВерсПрог', '5.0')
+    root.set('ВерсФорм', '5.0')
     
-    # Создаем элемент Документ
-    document = etree.SubElement(root, "Документ")
+    # Документ
+    doc = SubElement(root, 'Документ')
+    doc.set('КНД', '1110335')  # Код формы КС-2
+    doc.set('ДатаИнфПодр', act.created_at.strftime('%d.%m.%Y'))
+    doc.set('ВремИнфПодр', act.created_at.strftime('%H:%M:%S'))
+    doc.set('НаимЭкСубСост', 'ООО «Мостоотряд-69»')
     
-    # Код вида документа (КС-2)
-    knd = etree.SubElement(document, "КНД")
-    knd.text = "1110335"
-    
-    # Дата и время формирования
-    date_info = etree.SubElement(document, "ДатаИнфПодр")
-    date_info.text = act.created_at.strftime("%d.%m.%Y")
-    
-    time_info = etree.SubElement(document, "ВремИнфПодр")
-    time_info.text = act.created_at.strftime("%H:%M:%S")
-    
-    # Наименование экономического субъекта-составителя
-    org_name = etree.SubElement(document, "НаимЭкСубСост")
-    org_name.text = "ООО «Мостоотряд-69»"
-    
-    # Сведения об акте сдачи-приемки
-    sv_act = etree.SubElement(document, "СвАктСдПр")
-    
-    # Номер акта
-    nom_act = etree.SubElement(sv_act, "НомАкт")
-    nom_act.text = str(act.number)
-    
-    # Дата акта
-    data_act = etree.SubElement(sv_act, "ДатаАкт")
-    data_act.text = act.created_at.strftime("%d.%m.%Y")
-    
-    # Объект строительства
-    object_name = etree.SubElement(sv_act, "НаимОбъект")
-    object_name.text = act.object.name
+    # Сведения об акте
+    sv_act = SubElement(doc, 'СвАктСдПр')
+    sv_act.set('НомАкт', str(act.number))
+    sv_act.set('ДатаАкт', act.date.strftime('%d.%m.%Y'))
+    sv_act.set('НаимСтр', act.object.name if act.object else '')
+    if act.period_start:
+        sv_act.set('ПериодС', act.period_start.strftime('%d.%m.%Y'))
+    if act.period_end:
+        sv_act.set('ПериодПо', act.period_end.strftime('%d.%m.%Y'))
     
     # Договор
-    dogovor = etree.SubElement(sv_act, "СвДоговор")
-    nom_dog = etree.SubElement(dogovor, "НомДоговор")
-    nom_dog.text = act.contract.number
-    data_dog = etree.SubElement(dogovor, "ДатаДоговор")
-    data_dog.text = act.contract.date.strftime("%d.%m.%Y") if act.contract.date else ""
+    if act.contract:
+        sv_act.set('НомДог', act.contract.number or '')
+        if act.contract.date:
+            sv_act.set('ДатаДог', act.contract.date.strftime('%d.%m.%Y'))
     
-    # Период выполнения работ
-    period = etree.SubElement(sv_act, "ПериодВыполн")
-    data_nach = etree.SubElement(period, "ДатаНач")
-    data_nach.text = act.period_start.strftime("%d.%m.%Y") if act.period_start else ""
-    data_okon = etree.SubElement(period, "ДатаОкон")
-    data_okon.text = act.period_end.strftime("%d.%m.%Y") if act.period_end else ""
-    
-    # Заказчик
-    zakazchik = etree.SubElement(sv_act, "Заказчик")
-    naam_zak = etree.SubElement(zakazchik, "НаимОрг")
-    naam_zak.text = act.contract.contractor.name
-    inn_zak = etree.SubElement(zakazchik, "ИНН")
-    inn_zak.text = act.contract.contractor.inn or ""
-    
-    # Элементы работ (цикл по items)
+    # Элементы работ
     for idx, item in enumerate(items, 1):
-        naim_ist = etree.SubElement(document, "НаимИСт")
-        
-        # Номер позиции
-        nom_poz = etree.SubElement(naim_ist, "НомПоз")
-        nom_poz.text = str(idx)
-        
-        # Номер позиции по смете
-        nom_smet = etree.SubElement(naim_ist, "НомПозСмет")
-        nom_smet.text = item.work_code or ""
-        
-        # Наименование работы
-        naam_rab = etree.SubElement(naim_ist, "НаимРабот")
-        naam_rab.text = item.work_type.name
-        
-        # Номер единичной расценки
-        nom_ras = etree.SubElement(naim_ist, "НомРасц")
-        nom_ras.text = item.unit_rate or ""
-        
-        # Единица измерения
-        ed_izm = etree.SubElement(naim_ist, "ЕдИзм")
-        ed_izm.text = item.unit or ""
-        
-        # Количество
-        kol_vo = etree.SubElement(naim_ist, "КолВо")
-        kol_vo.text = str(item.quantity)
-        
-        # Цена за единицу
-        cena_ed = etree.SubElement(naim_ist, "ЦенаЕд")
-        cena_ed.text = f"{item.unit_price:.2f}"
-        
-        # Стоимость
-        stoim = etree.SubElement(naim_ist, "Стоимость")
-        stoim.text = f"{item.total:.2f}"
+        naim_ist = SubElement(doc, 'НаимИСт')
+        naim_ist.set('НомСтр', str(idx))
+        work_name = item.name or (item.work_type.name if item.work_type else '')
+        naim_ist.set('НаимРабот', work_name)
+        naim_ist.set('EdIzm', item.unit or 'ед.')
+        naim_ist.set('Kolichestvo', str(item.quantity))
+        naim_ist.set('TsenaEd', str(item.price))
+        naim_ist.set('Stoimost', str(item.total))
     
-    # Настройки формирования документа
-    nastr_form = etree.SubElement(document, "НастрФормДок")
-    priznak_print = etree.SubElement(nastr_form, "ПризнакПечать")
-    priznak_print.text = "Бумажный документ"
+    # Настройки формирования
+    nastr = SubElement(doc, 'НастрФормДок')
+    nastr.set('PrintFormat', 'XML')
     
     # Итоговые суммы
-    vsego_akt = etree.SubElement(document, "ВсегоАктОтч")
-    summa_vsego = etree.SubElement(vsego_akt, "СуммаВсего")
-    summa_vsego.text = f"{act.total_sum:.2f}"
+    vsego = SubElement(doc, 'ВсегоАктОтч')
+    total_sum = sum(item.total for item in items)
+    vsego.set('SumAktObsch', f"{total_sum:.2f}")
     
     # Подписант от подрядчика
-    podpisan = etree.SubElement(document, "ПодписантПодр")
-    dolzhn = etree.SubElement(podpisan, "Должн")
-    dolzhn.text = "Руководитель организации"
-    fio_podp = etree.SubElement(podpisan, "ФИОПодп")
-    fio_podp.text = "Генеральный директор"
+    podp = SubElement(doc, 'ПодписантПодр')
+    podp.set('DolzhnPodp', 'Генеральный директор')
+    if act.contract and act.contract.contractor:
+        podp.set('FIO', act.contract.contractor.name)
+    else:
+        podp.set('FIO', '________________')
+    podp.set('DeystvNaOsn', 'Устава')
     
-    # Сериализация в строку с кодировкой Windows-1251
-    xml_str = etree.tostring(
-        root,
-        pretty_print=True,
-        encoding='windows-1251',
-        xml_declaration=True
-    )
+    # Преобразование в строку с кодировкой Windows-1251
+    xml_str = tostring(root, encoding='windows-1251', xml_declaration=True)
     
     return xml_str
 
 
 def generate_ks3_xml(act, items):
     """
-    Генерация XML для КС-3 по Приказу ФНС № ЕД-7-26/691
-    
-    Args:
-        act: объект модели Act
-        items: queryset объектов ActItem
-    
-    Returns:
-        bytes: XML контент в кодировке Windows-1251
+    Генерация XML для формы КС-3
     """
-    # Создаем корневой элемент
-    root = etree.Element(
-        "Файл",
-        xmlns="http://www.nalog.ru/edocs/ks3",
-        ИдФайл=f"KS3-{uuid.uuid4().hex[:10].upper()}",
-        ВерсПрог="5.2",
-        ВерсФорм="5.0"
-    )
+    # Корневой элемент
+    root = Element('Файл')
+    root.set('ИдФайл', f"KS3-{act.id}-{uuid.uuid4().hex[:8].upper()}")
+    root.set('ВерсПрог', '5.0')
+    root.set('ВерсФорм', '5.0')
     
-    # Создаем элемент Документ
-    document = etree.SubElement(root, "Документ")
-    
-    # Код вида документа (КС-3)
-    knd = etree.SubElement(document, "КНД")
-    knd.text = "1110336"
-    
-    # Дата и время формирования
-    date_info = etree.SubElement(document, "ДатаИнфПодр")
-    date_info.text = act.created_at.strftime("%d.%m.%Y")
-    
-    time_info = etree.SubElement(document, "ВремИнфПодр")
-    time_info.text = act.created_at.strftime("%H:%M:%S")
-    
-    # Наименование экономического субъекта-составителя
-    org_name = etree.SubElement(document, "НаимЭкСубСост")
-    org_name.text = "ООО «Мостоотряд-69»"
+    # Документ
+    doc = SubElement(root, 'Документ')
+    doc.set('КНД', '1110336')  # Код формы КС-3
+    doc.set('ДатаИнфПодр', act.created_at.strftime('%d.%m.%Y'))
+    doc.set('ВремИнфПодр', act.created_at.strftime('%H:%M:%S'))
+    doc.set('НаимЭкСубСост', 'ООО «Мостоотряд-69»')
     
     # Сведения о справке
-    sv_spravka = etree.SubElement(document, "СвСправка")
-    
-    # Номер справки
-    nom_spravka = etree.SubElement(sv_spravka, "НомСправка")
-    nom_spravka.text = str(act.number)
-    
-    # Дата справки
-    data_spravka = etree.SubElement(sv_spravka, "ДатаСправка")
-    data_spravka.text = act.created_at.strftime("%d.%m.%Y")
-    
-    # Объект строительства
-    object_name = etree.SubElement(sv_spravka, "НаимОбъект")
-    object_name.text = act.object.name
+    sv_spravka = SubElement(doc, 'СвSpravka')
+    sv_spravka.set('НомСправ', str(act.number))
+    sv_spravka.set('ДатаСправ', act.date.strftime('%d.%m.%Y'))
+    sv_spravka.set('НаимСтр', act.object.name if act.object else '')
     
     # Договор
-    dogovor = etree.SubElement(sv_spravka, "СвДоговор")
-    nom_dog = etree.SubElement(dogovor, "НомДоговор")
-    nom_dog.text = act.contract.number
-    data_dog = etree.SubElement(dogovor, "ДатаДоговор")
-    data_dog.text = act.contract.date.strftime("%d.%m.%Y") if act.contract.date else ""
+    if act.contract:
+        sv_spravka.set('НомДог', act.contract.number or '')
+        if act.contract.date:
+            sv_spravka.set('ДатаДог', act.contract.date.strftime('%d.%m.%Y'))
     
-    # Период выполнения работ
-    period = etree.SubElement(sv_spravka, "ПериодВыполн")
-    data_nach = etree.SubElement(period, "ДатаНач")
-    data_nach.text = act.period_start.strftime("%d.%m.%Y") if act.period_start else ""
-    data_okon = etree.SubElement(period, "ДатаОкон")
-    data_okon.text = act.period_end.strftime("%d.%m.%Y") if act.period_end else ""
-    
-    # Заказчик
-    zakazchik = etree.SubElement(sv_spravka, "Заказчик")
-    naam_zak = etree.SubElement(zakazchik, "НаимОрг")
-    naam_zak.text = act.contract.contractor.name
-    inn_zak = etree.SubElement(zakazchik, "ИНН")
-    inn_zak.text = act.contract.contractor.inn or ""
-    
-    # Элементы работ (цикл по items)
+    # Элементы работ
     for idx, item in enumerate(items, 1):
-        naim_ist = etree.SubElement(document, "НаимИСт")
-        
-        # Номер позиции
-        nom_poz = etree.SubElement(naim_ist, "НомПоз")
-        nom_poz.text = str(idx)
-        
-        # Наименование работы
-        naam_rab = etree.SubElement(naim_ist, "НаимРабот")
-        naam_rab.text = item.work_type.name
-        
-        # Единица измерения
-        ed_izm = etree.SubElement(naim_ist, "ЕдИзм")
-        ed_izm.text = item.unit or ""
-        
-        # Стоимость
-        stoim = etree.SubElement(naim_ist, "Стоимость")
-        stoim.text = f"{item.total:.2f}"
+        naim_ist = SubElement(doc, 'НаимИСт')
+        naim_ist.set('НомСтр', str(idx))
+        work_name = item.name or (item.work_type.name if item.work_type else '')
+        naim_ist.set('НаимРабот', work_name)
+        naim_ist.set('Stoimost', str(item.total))
     
-    # Настройки формирования документа
-    nastr_form = etree.SubElement(document, "НастрФормДок")
-    priznak_print = etree.SubElement(nastr_form, "ПризнакПечать")
-    priznak_print.text = "Бумажный документ"
+    # Настройки формирования
+    nastr = SubElement(doc, 'НастрФормДок')
+    nastr.set('PrintFormat', 'XML')
     
     # Итоговые суммы
-    vsego_spravka = etree.SubElement(document, "ВсегоСправкаОтч")
-    summa_vsego = etree.SubElement(vsego_spravka, "СуммаВсего")
-    summa_vsego.text = f"{act.total_sum:.2f}"
+    vsego = SubElement(doc, 'ВсегоАктОтч')
+    total_sum = sum(item.total for item in items)
+    vsego.set('SumAktObsch', f"{total_sum:.2f}")
     
     # Подписант от подрядчика
-    podpisan = etree.SubElement(document, "ПодписантПодр")
-    dolzhn = etree.SubElement(podpisan, "Должн")
-    dolzhn.text = "Руководитель организации"
-    fio_podp = etree.SubElement(podpisan, "ФИОПодп")
-    fio_podp.text = "Генеральный директор"
+    podp = SubElement(doc, 'ПодписантПодр')
+    podp.set('DolzhnPodp', 'Генеральный директор')
+    if act.contract and act.contract.contractor:
+        podp.set('FIO', act.contract.contractor.name)
+    else:
+        podp.set('FIO', '________________')
+    podp.set('DeystvNaOsn', 'Устава')
     
     # Главный бухгалтер
-    glavbuх = etree.SubElement(document, "ГлавБух")
-    fio_gb = etree.SubElement(glavbuх, "ФИО")
-    fio_gb.text = ""
+    glavbuh = SubElement(doc, 'GlavBuhgalter')
+    glavbuh.set('FIO', '________________')
     
-    # Сериализация в строку с кодировкой Windows-1251
-    xml_str = etree.tostring(
-        root,
-        pretty_print=True,
-        encoding='windows-1251',
-        xml_declaration=True
-    )
+    # Преобразование в строку с кодировкой Windows-1251
+    xml_str = tostring(root, encoding='windows-1251', xml_declaration=True)
     
     return xml_str
