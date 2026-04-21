@@ -2,153 +2,207 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Акт КС-2 №{{ act.number }}</title>
+    <title>Акт о приемке выполненных работ (КС-2)</title>
     <style>
         @page {
             size: A4;
             margin: 1cm;
         }
-        body { 
-            font-family: "DejaVu Sans", sans-serif;
-            font-size: 11px;
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
             line-height: 1.3;
+            color: #000;
         }
-        .header { 
-            text-align: center; 
-            margin-bottom: 15px; 
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
         }
-        .title { 
-            font-weight: bold; 
-            font-size: 13px; 
-            margin: 10px 0; 
-            text-transform: uppercase;
+        .header-table td {
+            padding: 3px 5px;
+            vertical-align: top;
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 10px 0; 
-        }
-        th, td { 
-            border: 1px solid #000; 
-            padding: 3px 5px; 
-            text-align: left; 
-            font-size: 10px;
-        }
-        th { 
-            background-color: #f0f0f0; 
-            text-align: center; 
+        .form-title {
+            text-align: center;
             font-weight: bold;
+            font-size: 14pt;
+            margin: 15px 0;
         }
-        .info-table { 
-            width: 100%; 
-            margin-bottom: 15px; 
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
         }
-        .info-table td { 
-            border: none; 
-            padding: 2px 4px; 
+        .main-table th, .main-table td {
+            border: 1px solid #000;
+            padding: 5px 3px;
+            text-align: center;
         }
-        .total-row { 
-            font-weight: bold; 
-        }
-        .signature { 
-            margin-top: 30px; 
-        }
-        .signature-line { 
-            border-bottom: 1px solid #000; 
-            display: inline-block; 
-            width: 180px; 
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-size: 13px;
-            margin: 8px 0;
-        }
-        strong, b {
+        .main-table th {
             font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        .text-left {
+            text-align: left !important;
+        }
+        .text-right {
+            text-align: right !important;
+        }
+        .signature-block {
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .signature-field {
+            width: 48%;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            margin-top: 25px;
+            padding-top: 3px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="title">АКТ О ПРИЁМКЕ ВЫПОЛНЕННЫХ РАБОТ (КС-2)</div>
-        <div>№ {{ act.number }} от {{ act.date|date:"d.m.Y" }}</div>
-    </div>
-    
-    <table class="info-table">
+    <!-- Шапка документа -->
+    <table class="header-table">
         <tr>
-            <td style="width: 25%;"><strong>Заказчик:</strong></td>
-            <td>{{ contractor.name }}</td>
+            <td style="width: 50%;">
+                <strong>Инвестор (заказчик):</strong><br>
+                {{ act.contract.contractor.name }}<br>
+                {% if act.contract.contractor.inn %}ИНН: {{ act.contract.contractor.inn }}{% endif %}
+            </td>
+            <td style="width: 50%;">
+                <strong>Подрядчик:</strong><br>
+                {{ organization }}<br>
+                ИНН: {{ inn }}
+            </td>
         </tr>
         <tr>
-            <td><strong>ИНН/КПП:</strong></td>
-            <td>{{ contractor.inn }}{% if contractor.kpp %}/{{ contractor.kpp }}{% endif %}</td>
+            <td colspan="2">
+                <strong>Стройка:</strong> {{ act.object.name }}
+            </td>
         </tr>
         <tr>
-            <td><strong>Подрядчик:</strong></td>
-            <td>{{ contractor.name }}</td>
+            <td colspan="2">
+                <strong>Объект:</strong> {{ act.object.description|default:act.object.name }}
+            </td>
         </tr>
-        <tr>
-            <td><strong>Договор:</strong></td>
-            <td>№ {{ act.contract.number }} от {{ act.contract.date|date:"d.m.Y" }}</td>
-        </tr>
-        <tr>
-            <td><strong>Объект:</strong></td>
-            <td>{{ object.name }}{% if object.address %}, {{ object.address }}{% endif %}</td>
-        </tr>
-        {% if act.period_start and act.period_end %}
-        <tr>
-            <td><strong>Период:</strong></td>
-            <td>с {{ act.period_start|date:"d.m.Y" }} по {{ act.period_end|date:"d.m.Y" }}</td>
-        </tr>
-        {% endif %}
     </table>
-    
-    <table>
+
+    <div class="form-title">
+        АКТ<br>
+        о приемке выполненных работ
+    </div>
+
+    <!-- Таблица с номером и датой договора -->
+    <table class="header-table" style="margin-bottom: 5px;">
+        <tr>
+            <td style="width: 50%;">
+                Договор подряда № {{ act.contract.number }} от {{ act.contract.date|date:"d.m.Y" }}
+            </td>
+            <td style="width: 50%; text-align: right;">
+                Номер акта: {{ act.number }}<br>
+                Дата составления: {{ act.created_at|date:"d.m.Y" }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Отчетный период -->
+    <table class="header-table" style="margin-bottom: 10px;">
+        <tr>
+            <td>
+                <strong>Отчетный период:</strong> с {{ act.period_start|date:"d.m.Y" }} по {{ act.period_end|date:"d.m.Y" }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Основная таблица работ -->
+    <table class="main-table">
         <thead>
             <tr>
-                <th style="width: 5%;">№</th>
-                <th style="width: 40%;">Наименование работ</th>
-                <th style="width: 10%;">Ед. изм.</th>
-                <th style="width: 15%;">Количество</th>
-                <th style="width: 15%;">Цена</th>
-                <th style="width: 15%;">Стоимость</th>
+                <th style="width: 5%;">№ п/п</th>
+                <th style="width: 10%;">Номер позиции<br>по смете</th>
+                <th style="width: 30%;">Наименование работ</th>
+                <th style="width: 10%;">Номер единичной<br>расценки</th>
+                <th style="width: 8%;">Ед. изм.</th>
+                <th style="width: 8%;">Количество</th>
+                <th style="width: 12%;">Цена за ед., руб.</th>
+                <th style="width: 17%;">Стоимость, руб.</th>
             </tr>
         </thead>
         <tbody>
             {% for item in items %}
             <tr>
-                <td style="text-align: center;">{{ item.number }}</td>
-                <td>{{ item.name }}</td>
-                <td style="text-align: center;">{{ item.unit }}</td>
-                <td style="text-align: right;">{{ item.quantity|floatformat:4 }}</td>
-                <td style="text-align: right;">{{ item.price|floatformat:2 }}</td>
-                <td style="text-align: right;">{{ item.total|floatformat:2 }}</td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.work_code|default:"-" }}</td>
+                <td class="text-left">{{ item.work_type.name }}</td>
+                <td>{{ item.unit_rate|default:"-" }}</td>
+                <td>{{ item.unit }}</td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+                <td class="text-right">{{ item.total|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center;">Нет данных о выполненных работах</td>
             </tr>
             {% endfor %}
-        </tbody>
-        <tfoot>
+            
+            <!-- Итого -->
             <tr class="total-row">
-                <td colspan="5" style="text-align: right;">Итого:</td>
-                <td style="text-align: right;">{{ act.total_amount|floatformat:2 }}</td>
+                <td colspan="7" style="text-align: right;"><strong>Итого по акту:</strong></td>
+                <td class="text-right"><strong>{{ act.total_sum|floatformat:2 }}</strong></td>
             </tr>
-            {% if not act.without_nds %}
-            <tr>
-                <td colspan="5" style="text-align: right;">В том числе НДС ({{ act.nds_rate }}%):</td>
-                <td style="text-align: right;">{{ act.nds_amount|floatformat:2 }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" style="text-align: right;">Без НДС</td>
-                <td style="text-align: right;">-</td>
-            </tr>
-            {% endif %}
-        </tfoot>
+        </tbody>
     </table>
-    
-    <div class="signature">
-        <p><strong>Сдал (Подрядчик):</strong></p>
-        <p>{{ contractor.director_position }} _________________ / {{ contractor.director_name|default:"" }} /</p>
-        <p style="margin-top: 15px;"><strong>Принял (Заказчик):</strong></p>
-        <p>_________________ / _______________________ /</p>
+
+    <!-- Подписи -->
+    <div class="signature-block">
+        <div class="signature-row">
+            <div class="signature-field">
+                <strong>Подрядчик:</strong><br>
+                <br>
+                <div class="signature-line">
+                    (подпись)
+                </div>
+                <br>
+                М.П.
+            </div>
+            <div class="signature-field">
+                <strong>Заказчик:</strong><br>
+                <br>
+                <div class="signature-line">
+                    (подпись)
+                </div>
+                <br>
+                М.П.
+            </div>
+        </div>
+        
+        <div class="signature-row" style="margin-top: 20px;">
+            <div class="signature-field">
+                Руководитель подрядной организации:<br>
+                <div class="signature-line">
+                    ___________________ / {{ organization }}
+                </div>
+            </div>
+            <div class="signature-field">
+                Представитель заказчика:<br>
+                <div class="signature-line">
+                    ___________________ / {{ act.contract.contractor.name }}
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
