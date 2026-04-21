@@ -8,40 +8,48 @@ __pycache__/
 # Database
 db.sqlite3
 
-# Environment
-.env
-.env.local
-*.env.*
-
 # Dependencies
 .venv/
 venv/
-pip-log.txt
-pipenv.lock
+env/
 
 # Logs
 *.log
 
-# Coverage
-.coverage
-coverage/
-htmlcov/
-
-# Temporary files
-*.tmp
-*.swp
-*~
+# OS generated files
 .DS_Store
 Thumbs.db
 
 # IDE
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
+*.swp
+*.swo
 
-# Build and distribution
+# Coverage
+.coverage
+coverage/
+htmlcov/
+
+# Distribution / packaging
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 *.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.mypy_cache/
 ```
