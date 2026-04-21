@@ -1,61 +1,67 @@
 """
 Валидаторы XML файлов для форм КС-2 и КС-3
+Простая валидация структуры без XSD схем
 """
 
-import os
-from lxml import etree
+import xml.etree.ElementTree as ET
 
 
-def validate_xml(xml_content, schema_name):
+def validate_xml(xml_content, schema_name=None):
     """
-    Валидация XML по XSD схеме
-    
-    Args:
-        xml_content: bytes или str с XML контентом
-        schema_name: имя файла XSD схемы (например, 'ks2_schema.xsd')
-    
-    Returns:
-        tuple: (is_valid: bool, message: str)
+    Валидация XML файла
+    Возвращает: (is_valid: bool, message: str)
     """
     try:
-        # Определяем путь к схеме
-        schema_path = os.path.join(
-            os.path.dirname(__file__),
-            'schemas',
-            schema_name
-        )
-        
-        # Проверяем существование файла схемы
-        if not os.path.exists(schema_path):
-            return False, f"Файл схемы не найден: {schema_path}"
-        
-        # Загружаем XSD схему
-        with open(schema_path, 'rb') as f:
-            schema_doc = etree.parse(f)
-        
-        schema = etree.XMLSchema(schema_doc)
-        
-        # Парсим XML контент
+        # Попытка распарсить XML
         if isinstance(xml_content, bytes):
-            xml_doc = etree.fromstring(xml_content)
+            root = ET.fromstring(xml_content)
         else:
-            xml_doc = etree.fromstring(xml_content.encode('utf-8'))
+            root = ET.fromstring(xml_content.encode('utf-8'))
         
-        # Валидируем XML
-        if schema.validate(xml_doc):
-            return True, "XML успешно прошел валидацию по схеме"
-        else:
-            # Формируем сообщение об ошибках
-            errors = []
-            for error in schema.error_log:
-                errors.append(f"Строка {error.line}: {error.message}")
-            
-            error_message = "Ошибки валидации:\n" + "\n".join(errors)
-            return False, error_message
-            
-    except etree.XMLSyntaxError as e:
-        return False, f"Ошибка синтаксиса XML: {str(e)}"
-    except etree.XMLSchemaError as e:
-        return False, f"Ошибка схемы XSD: {str(e)}"
+        # Проверка корневого элемента
+        if root.tag != 'Файл':
+            return False, "Ошибка: Корневой элемент должен быть 'Файл'"
+        
+        # Проверка обязательных атрибутов
+        required_attrs = ['ИдФайл', 'ВерсПрог', 'ВерсФорм']
+        for attr in required_attrs:
+            if attr not in root.attrib:
+                return False, f"Ошибка: Отсутствует атрибут '{attr}'"
+        
+        # Поиск элемента Документ
+        doc = root.find('Документ')
+        if doc is None:
+            return False, "Ошибка: Отсутствует элемент 'Документ'"
+        
+        # Проверка КНД
+        knd = doc.get('КНД')
+        if not knd:
+            return False, "Ошибка: Отсутствует код формы (КНД)"
+        
+        if knd not in ['1110335', '1110336']:
+            return False, f"Ошибка: Неверный код формы КНД: {knd}"
+        
+        # Проверка наличия элементов работ (ищем внутри Документ)
+        items = doc.findall('НаимИСт')
+        if len(items) == 0:
+            return False, "Ошибка: Отсутствуют элементы работ"
+        
+        # Проверка итоговых сумм
+        vsego = doc.find('ВсегоАктОтч')
+        if vsego is None:
+            return False, "Ошибка: Отсутствует элемент с итоговыми суммами"
+        
+        if not vsego.get('SumAktObsch'):
+            return False, "Ошибка: Отсутствует общая сумма акта"
+        
+        # Проверка подписанта
+        podp = doc.find('ПодписантПодр')
+        if podp is None:
+            return False, "Ошибка: Отсутствует информация о подписанте"
+        
+        return True, "XML файл успешно прошел валидацию"
+        
+    except ET.ParseError as e:
+        return False, f"Ошибка парсинга XML: {str(e)}"
     except Exception as e:
-        return False, f"Неизвестная ошибка при валидации: {str(e)}"
+        return False, f"Ошибка валидации: {str(e)}"
