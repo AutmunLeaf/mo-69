@@ -84,9 +84,11 @@
                             <td>{{ error.column|default:"-" }}</td>
                             <td>{{ error.message }}</td>
                             <td>
-                                <span class="badge bg-{{ error.level == 'ERROR'|yesno:'danger,warning' }}">
-                                    {{ error.level }}
-                                </span>
+                                {% if error.level == 'ERROR' %}
+                                    <span class="badge bg-danger">{{ error.level }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ error.level }}</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
