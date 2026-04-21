@@ -5,51 +5,12 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Database
-db.sqlite3
-
-# Dependencies
-.venv/
-venv/
-env/
-
-# Logs
+# Logs and temp files
 *.log
+*.tmp
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Testing
-.pytest_cache/
-.mypy_cache/
+# Environment
+.env
+.env.local
+*.env.*
 ```

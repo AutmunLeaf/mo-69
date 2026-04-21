@@ -1,99 +1,61 @@
 """
-Валидатор XML файлов для форм КС-2/КС-3.
-Проверяет соответствие XSD схеме.
+Валидаторы XML файлов для форм КС-2 и КС-3
 """
 
-from lxml import etree
 import os
+from lxml import etree
 
 
-def validate_xml(xml_content, schema_path=None):
+def validate_xml(xml_content, schema_name):
     """
-    Валидирует XML файл по XSD схеме.
+    Валидация XML по XSD схеме
     
     Args:
-        xml_content: строка с XML содержимым
-        schema_path: путь к XSD схеме (по умолчанию используется схема ks2_diadoc_schema.xsd)
+        xml_content: bytes или str с XML контентом
+        schema_name: имя файла XSD схемы (например, 'ks2_schema.xsd')
     
     Returns:
-        dict: результат валидации {'valid': bool, 'errors': list}
+        tuple: (is_valid: bool, message: str)
     """
-    if schema_path is None:
-        # Путь к схеме по умолчанию
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        schema_path = os.path.join(base_dir, 'schemas', 'ks2_diadoc_schema.xsd')
-    
-    result = {
-        'valid': False,
-        'errors': [],
-        'warnings': []
-    }
-    
     try:
-        # Парсим XML
-        xml_doc = etree.fromstring(xml_content.encode('utf-8'))
+        # Определяем путь к схеме
+        schema_path = os.path.join(
+            os.path.dirname(__file__),
+            'schemas',
+            schema_name
+        )
         
-        # Проверяем существование схемы
+        # Проверяем существование файла схемы
         if not os.path.exists(schema_path):
-            result['warnings'].append(f'Файл схемы не найден: {schema_path}')
-            result['valid'] = True  # Без схемы считаем валидным
-            return result
+            return False, f"Файл схемы не найден: {schema_path}"
         
-        # Загружаем схему
+        # Загружаем XSD схему
         with open(schema_path, 'rb') as f:
             schema_doc = etree.parse(f)
         
         schema = etree.XMLSchema(schema_doc)
         
-        # Валидируем
-        if schema.validate(xml_doc):
-            result['valid'] = True
+        # Парсим XML контент
+        if isinstance(xml_content, bytes):
+            xml_doc = etree.fromstring(xml_content)
         else:
-            result['valid'] = False
+            xml_doc = etree.fromstring(xml_content.encode('utf-8'))
+        
+        # Валидируем XML
+        if schema.validate(xml_doc):
+            return True, "XML успешно прошел валидацию по схеме"
+        else:
+            # Формируем сообщение об ошибках
+            errors = []
             for error in schema.error_log:
-                result['errors'].append({
-                    'line': error.line,
-                    'column': error.column,
-                    'message': error.message,
-                    'level': error.level_name
-                })
-    
+                errors.append(f"Строка {error.line}: {error.message}")
+            
+            error_message = "Ошибки валидации:\n" + "\n".join(errors)
+            return False, error_message
+            
     except etree.XMLSyntaxError as e:
-        result['valid'] = False
-        result['errors'].append({
-            'line': e.lineno,
-            'column': e.position[0] if len(e.position) > 0 else 0,
-            'message': str(e),
-            'level': 'ERROR'
-        })
+        return False, f"Ошибка синтаксиса XML: {str(e)}"
+    except etree.XMLSchemaError as e:
+        return False, f"Ошибка схемы XSD: {str(e)}"
     except Exception as e:
-        result['valid'] = False
-        result['errors'].append({
-            'message': str(e),
-            'level': 'ERROR'
-        })
-    
-    return result
-
-
-def validate_xml_file(file_path, schema_path=None):
-    """
-    Валидирует XML файл по XSD схеме.
-    
-    Args:
-        file_path: путь к XML файлу
-        schema_path: путь к XSD схеме
-    
-    Returns:
-        dict: результат валидации
-    """
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            xml_content = f.read()
-        return validate_xml(xml_content, schema_path)
-    except Exception as e:
-        return {
-            'valid': False,
-            'errors': [{'message': str(e), 'level': 'ERROR'}],
-            'warnings': []
-        }
+        return False, f"Неизвестная ошибка при валидации: {str(e)}"
