@@ -1,0 +1,166 @@
+/*
+ * Custom CSS для проекта ООО «Мостоотряд-69»
+ * Автоматизация сдачи-приёмки строительных работ
+ */
+
+/* Sidebar стили */
+#wrapper {
+    overflow-x: hidden;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    margin-left: -15rem;
+    transition: margin 0.25s ease-out;
+    background-color: #343a40;
+    position: fixed;
+    z-index: 1000;
+    width: 15rem;
+}
+
+#sidebar-wrapper .sidebar-heading {
+    padding: 1.5rem 1.25rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #212529;
+    border-bottom: 1px solid #4b545c;
+}
+
+#sidebar-wrapper .list-group {
+    width: 15rem;
+}
+
+#sidebar-wrapper .list-group-item {
+    background-color: #343a40;
+    color: #fff;
+    border: none;
+    border-bottom: 1px solid #4b545c;
+    padding: 0.75rem 1.25rem;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: #495057;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+#sidebar-wrapper .list-group-item i {
+    margin-right: 0.5rem;
+}
+
+#page-content-wrapper {
+    min-width: 100vw;
+    margin-left: 0;
+    transition: margin 0.25s ease-out;
+}
+
+/* Состояние с развёрнутым sidebar */
+body.sb-sidenav-toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+        margin-left: 15rem;
+    }
+
+    body.sb-sidenav-toggled #sidebar-wrapper {
+        margin-left: -15rem;
+    }
+
+    body.sb-sidenav-toggled #page-content-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Статусы актов */
+.status-draft {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status-review {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.status-approved {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.status-paid {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.status-rejected {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Карточки статистики */
+.card.bg-primary,
+.card.bg-warning,
+.card.bg-info,
+.card.bg-success,
+.card.bg-secondary,
+.card.bg-dark {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Адаптивность для форм */
+@media (max-width: 768px) {
+    .work-item {
+        flex-direction: column;
+    }
+    
+    .work-item > div {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Таблицы */
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+/* Кнопки действий */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Формы */
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Alerts */
+.alert {
+    border-radius: 0.5rem;
+}
+
+/* Sidebar toggle button */
+#sidebarToggle {
+    transition: all 0.2s ease-in-out;
+}
+
+#sidebarToggle:hover {
+    transform: scale(1.05);
+}

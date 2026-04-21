@@ -1,0 +1,225 @@
+{% extends 'acts/base.html' %}
+
+{% block title %}Создание акта - ООО «Мостоотряд-69»{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-plus-circle"></i> Создание акта КС-2</h2>
+
+<form method="post" id="actForm">
+    {% csrf_token %}
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Основная информация</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ act_form.number.id_for_label }}" class="form-label">Номер акта *</label>
+                    {{ act_form.number }}
+                    {% if act_form.number.errors %}
+                        <div class="text-danger">{{ act_form.number.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ act_form.date.id_for_label }}" class="form-label">Дата акта *</label>
+                    {{ act_form.date }}
+                    {% if act_form.date.errors %}
+                        <div class="text-danger">{{ act_form.date.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ act_form.contract.id_for_label }}" class="form-label">Договор *</label>
+                    {{ act_form.contract }}
+                    {% if act_form.contract.errors %}
+                        <div class="text-danger">{{ act_form.contract.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ act_form.object.id_for_label }}" class="form-label">Объект *</label>
+                    {{ act_form.object }}
+                    {% if act_form.object.errors %}
+                        <div class="text-danger">{{ act_form.object.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ act_form.period_start.id_for_label }}" class="form-label">Период с</label>
+                    {{ act_form.period_start }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ act_form.period_end.id_for_label }}" class="form-label">Период по</label>
+                    {{ act_form.period_end }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="{{ act_form.status.id_for_label }}" class="form-label">Статус</label>
+                    {{ act_form.status }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="{{ act_form.nds_rate.id_for_label }}" class="form-label">Ставка НДС (%)</label>
+                    {{ act_form.nds_rate }}
+                </div>
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <div class="form-check">
+                        {{ act_form.without_nds }}
+                        <label class="form-check-label" for="{{ act_form.without_nds.id_for_label }}">
+                            Без НДС
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ act_form.notes.id_for_label }}" class="form-label">Примечание</label>
+                {{ act_form.notes }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Строки работ -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Выполненные работы</h5>
+            <button type="button" class="btn btn-success btn-sm" onclick="addWorkItem()">
+                <i class="bi bi-plus-circle"></i> Добавить строку
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="workItemsContainer">
+                {{ item_formset.management_form }}
+                
+                {% for form in item_formset %}
+                <div class="work-item row mb-3 border-bottom pb-3">
+                    <div class="col-md-1">
+                        <label class="form-label">№</label>
+                        {{ form.number }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Наименование работ *</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Ед. изм.</label>
+                        {{ form.unit }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Количество *</label>
+                        {{ form.quantity }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Цена за ед. *</label>
+                        {{ form.price }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Действия</label>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeWorkItem(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        {{ form.DELETE }}
+                    </div>
+                    {{ form.work_type }}
+                    {{ form.notes }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Назад
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Сохранить акт
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Функция добавления новой строки работ
+function addWorkItem() {
+    const container = document.getElementById('workItemsContainer');
+    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    const newIndex = parseInt(totalForms.value);
+    
+    const newRow = document.createElement('div');
+    newRow.className = 'work-item row mb-3 border-bottom pb-3';
+    newRow.innerHTML = `
+        <div class="col-md-1">
+            <label class="form-label">№</label>
+            <input type="number" name="items-${newIndex}-number" class="form-control" min="1" value="${newIndex + 1}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Наименование работ *</label>
+            <input type="text" name="items-${newIndex}-name" class="form-control work-name" required>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Ед. изм.</label>
+            <input type="text" name="items-${newIndex}-unit" class="form-control work-unit" value="м3">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Количество *</label>
+            <input type="number" name="items-${newIndex}-quantity" class="form-control work-quantity" step="0.0001" required>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Цена за ед. *</label>
+            <input type="number" name="items-${newIndex}-price" class="form-control work-price" step="0.01" required>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Действия</label>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeWorkItem(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+            <input type="checkbox" name="items-${newIndex}-DELETE" id="id_items-${newIndex}-DELETE" style="display:none;">
+        </div>
+        <input type="hidden" name="items-${newIndex}-work_type" class="work-type-select">
+        <input type="hidden" name="items-${newIndex}-notes" class="form-control">
+    `;
+    
+    container.appendChild(newRow);
+    totalForms.value = newIndex + 1;
+}
+
+// Функция удаления строки работ
+function removeWorkItem(button) {
+    const row = button.closest('.work-item');
+    const deleteCheckbox = row.querySelector('input[type="checkbox"][name*="DELETE"]');
+    if (deleteCheckbox) {
+        deleteCheckbox.checked = true;
+        row.style.display = 'none';
+    } else {
+        row.remove();
+    }
+}
+
+// Валидация формы перед отправкой
+document.getElementById('actForm').addEventListener('submit', function(e) {
+    const requiredFields = this.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Пожалуйста, заполните все обязательные поля!');
+    }
+});
+</script>
+{% endblock %}

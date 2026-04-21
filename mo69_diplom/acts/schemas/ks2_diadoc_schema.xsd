@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns="http://www.nalog.ru/ndfl-document/"
+           targetNamespace="http://www.nalog.ru/ndfl-document/"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <!-- Корневой элемент Файл -->
+  <xs:element name="Файл">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Документ" type="ДокументТип"/>
+      </xs:sequence>
+      <xs:attribute name="ВерсФорм" type="xs:string" use="required"/>
+      <xs:attribute name="ВерсПрог" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Тип Документ -->
+  <xs:complexType name="ДокументТип">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name="КС2" type="КС2Тип"/>
+        <xs:element name="КС3" type="КС3Тип"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="ИдДок" type="xs:string" use="required"/>
+    <xs:attribute name="ДатаДок" type="xs:string" use="required"/>
+    <xs:attribute name="ВремяДок" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Тип КС2 -->
+  <xs:complexType name="КС2Тип">
+    <xs:sequence>
+      <xs:element name="Заголовок" type="ЗаголовокКС2Тип"/>
+      <xs:element name="Таблица" type="ТаблицаКС2Тип"/>
+      <xs:element name="Подписант" type="ПодписантТип" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Тип КС3 -->
+  <xs:complexType name="КС3Тип">
+    <xs:sequence>
+      <xs:element name="Заголовок" type="ЗаголовокКС3Тип"/>
+      <xs:element name="Сведения" type="СведенияКС3Тип"/>
+      <xs:element name="Подписант" type="ПодписантТип" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Заголовок КС2 -->
+  <xs:complexType name="ЗаголовокКС2Тип">
+    <xs:sequence>
+      <xs:element name="НаимОргЗаказчик" type="xs:string"/>
+      <xs:element name="ИННЗаказчик" type="xs:string"/>
+      <xs:element name="КППЗаказчик" type="xs:string" minOccurs="0"/>
+      <xs:element name="НаимОргПодрядчик" type="xs:string"/>
+      <xs:element name="ИННПодрядчик" type="xs:string"/>
+      <xs:element name="КПППодрядчик" type="xs:string" minOccurs="0"/>
+      <xs:element name="НомерДоговор" type="xs:string"/>
+      <xs:element name="ДатаДоговор" type="xs:string"/>
+      <xs:element name="НомерАкт" type="xs:string"/>
+      <xs:element name="ДатаАкт" type="xs:string"/>
+      <xs:element name="ПериодС" type="xs:string" minOccurs="0"/>
+      <xs:element name="ПериодПо" type="xs:string" minOccurs="0"/>
+      <xs:element name="НаимОбъект" type="xs:string"/>
+      <xs:element name="АдресОбъект" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Заголовок КС3 -->
+  <xs:complexType name="ЗаголовокКС3Тип">
+    <xs:sequence>
+      <xs:element name="НаимОргЗаказчик" type="xs:string"/>
+      <xs:element name="ИННЗаказчик" type="xs:string"/>
+      <xs:element name="КППЗаказчик" type="xs:string" minOccurs="0"/>
+      <xs:element name="НаимОргПодрядчик" type="xs:string"/>
+      <xs:element name="ИННПодрядчик" type="xs:string"/>
+      <xs:element name="КПППодрядчик" type="xs:string" minOccurs="0"/>
+      <xs:element name="НомерДоговор" type="xs:string"/>
+      <xs:element name="ДатаДоговор" type="xs:string"/>
+      <xs:element name="НомерАкт" type="xs:string"/>
+      <xs:element name="ДатаАкт" type="xs:string"/>
+      <xs:element name="НаимОбъект" type="xs:string"/>
+      <xs:element name="АдресОбъект" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Таблица КС2 -->
+  <xs:complexType name="ТаблицаКС2Тип">
+    <xs:sequence>
+      <xs:element name="СуммаВсего" type="xs:decimal"/>
+      <xs:element name="ВТомЧислеНДС" type="xs:decimal"/>
+      <xs:element name="БезНДС" type="xs:boolean"/>
+      <xs:element name="Строка" type="СтрокаТаблицыТип" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Строка таблицы -->
+  <xs:complexType name="СтрокаТаблицыТип">
+    <xs:sequence>
+      <xs:element name="НомерПп" type="xs:integer"/>
+      <xs:element name="НаименованиеРабот" type="xs:string"/>
+      <xs:element name="ЕдИзмерения" type="xs:string"/>
+      <xs:element name="Количество" type="xs:decimal"/>
+      <xs:element name="Цена" type="xs:decimal"/>
+      <xs:element name="Стоимость" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Сведения КС3 -->
+  <xs:complexType name="СведенияКС3Тип">
+    <xs:sequence>
+      <xs:element name="СтоимостьРабот" type="xs:decimal"/>
+      <xs:element name="НДС" type="xs:decimal"/>
+      <xs:element name="СтавкаНДС" type="xs:decimal"/>
+      <xs:element name="БезНДС" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Подписант -->
+  <xs:complexType name="ПодписантТип">
+    <xs:sequence>
+      <xs:element name="ФИОПодрядчик" type="xs:string"/>
+      <xs:element name="ДолжностьПодрядчик" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

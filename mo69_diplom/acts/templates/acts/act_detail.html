@@ -1,0 +1,191 @@
+{% extends 'acts/base.html' %}
+
+{% block title %}Акт №{{ act.number }} - ООО «Мостоотряд-69»{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-earmark-text"></i> Акт КС-2 №{{ act.number }}</h2>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Назад
+        </a>
+    </div>
+</div>
+
+<!-- Информация об акте -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Основная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Дата акта:</strong><br>
+                        {{ act.date|date:"d.m.Y" }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Статус:</strong><br>
+                        <span class="badge status-{{ act.status }}">
+                            {{ act.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Договор:</strong><br>
+                        <a href="#">№{{ act.contract.number }} от {{ act.contract.date|date:"d.m.Y" }}</a>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Контрагент:</strong><br>
+                        {{ act.contract.contractor.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong>Объект:</strong><br>
+                        {{ act.object.name }}
+                        {% if act.object.address %}
+                            <br><small class="text-muted">{{ act.object.address }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if act.period_start or act.period_end %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong>Период выполнения работ:</strong><br>
+                        {% if act.period_start %}{{ act.period_start|date:"d.m.Y" }}{% endif %} - 
+                        {% if act.period_end %}{{ act.period_end|date:"d.m.Y" }}{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">Финансовая информация</h5>
+                <hr>
+                <p class="mb-2"><strong>Ставка НДС:</strong> {{ act.nds_rate }}%</p>
+                <p class="mb-2"><strong>Без НДС:</strong> {% if act.without_nds %}Да{% else %}Нет{% endif %}</p>
+                <hr>
+                <h4 class="text-primary">
+                    {{ act.total_amount|floatformat:2 }} ₽
+                </h4>
+                <p class="text-muted mb-0">
+                    {% if not act.without_nds %}
+                    В т.ч. НДС: {{ act.nds_amount|floatformat:2 }} ₽
+                    {% else %}
+                    Без НДС
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Кнопки скачивания -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title">Экспорт</h6>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'generate_ks2_pdf' act.pk %}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-pdf"></i> Скачать КС-2 (PDF)
+                    </a>
+                    <a href="{% url 'generate_ks3_pdf' act.pk %}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-pdf"></i> Скачать КС-3 (PDF)
+                    </a>
+                    <a href="{% url 'generate_ks2_xml' act.pk %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-code"></i> Скачать КС-2 (XML)
+                    </a>
+                    <a href="{% url 'generate_ks3_xml' act.pk %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-code"></i> Скачать КС-3 (XML)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица работ -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Выполненные работы</h5>
+    </div>
+    <div class="card-body">
+        {% if items %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 5%;">№ п/п</th>
+                        <th style="width: 40%;">Наименование работ</th>
+                        <th style="width: 10%;">Ед. изм.</th>
+                        <th style="width: 15%;">Количество</th>
+                        <th style="width: 15%;">Цена за ед.</th>
+                        <th style="width: 15%;">Стоимость</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.number }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.quantity|floatformat:4 }}</td>
+                        <td>{{ item.price|floatformat:2 }} ₽</td>
+                        <td>{{ item.total|floatformat:2 }} ₽</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th colspan="5" class="text-end">Итого:</th>
+                        <th>{{ act.total_amount|floatformat:2 }} ₽</th>
+                    </tr>
+                    {% if not act.without_nds %}
+                    <tr>
+                        <th colspan="5" class="text-end">В том числе НДС ({{ act.nds_rate }}%):</th>
+                        <th>{{ act.nds_amount|floatformat:2 }} ₽</th>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <th colspan="5" class="text-end">Без НДС</th>
+                        <th>-</th>
+                    </tr>
+                    {% endif %}
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center">Работы не добавлены</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Примечание -->
+{% if act.notes %}
+<div class="card mt-4">
+    <div class="card-body">
+        <strong>Примечание:</strong>
+        <p class="mb-0">{{ act.notes }}</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Информация о создании -->
+<div class="card mt-4">
+    <div class="card-body text-muted small">
+        <p class="mb-1">
+            <strong>Создан:</strong> {{ act.created_at|date:"d.m.Y H:i" }}
+            {% if act.created_by %}
+                пользователем {{ act.created_by.get_full_name|default:act.created_by.username }}
+            {% endif %}
+        </p>
+        <p class="mb-0">
+            <strong>Обновлён:</strong> {{ act.updated_at|date:"d.m.Y H:i" }}
+        </p>
+    </div>
+</div>
+{% endblock %}
