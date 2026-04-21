@@ -10,6 +10,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from decimal import Decimal
 import json
+from io import BytesIO
+from xhtml2pdf import pisa
 
 from .models import Contractor, Object, WorkType, Contract, Act, ActItem
 from .forms import (
@@ -122,7 +124,17 @@ def generate_ks2_pdf(request, pk):
     
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="KS-2_{act.number}.pdf"'
-    response.write(html.encode('utf-8'))
+    
+    # Конвертируем HTML в PDF
+    pisa_status = pisa.CreatePDF(
+        BytesIO(html.encode('utf-8')),
+        dest=response,
+        encoding='utf-8'
+    )
+    
+    if pisa_status.err:
+        return HttpResponse('Ошибка при генерации PDF', status=500)
+    
     return response
 
 
@@ -143,7 +155,17 @@ def generate_ks3_pdf(request, pk):
     
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="KS-3_{act.number}.pdf"'
-    response.write(html.encode('utf-8'))
+    
+    # Конвертируем HTML в PDF
+    pisa_status = pisa.CreatePDF(
+        BytesIO(html.encode('utf-8')),
+        dest=response,
+        encoding='utf-8'
+    )
+    
+    if pisa_status.err:
+        return HttpResponse('Ошибка при генерации PDF', status=500)
+    
     return response
 
 
