@@ -1,0 +1,114 @@
+{% extends 'acts/base.html' %}
+
+{% block title %}Дашборд - ООО «Мостоотряд-69»{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Дашборд</h2>
+
+<!-- Статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Всего актов</h5>
+                <h2 class="mb-0">{{ total_acts }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title">Черновики</h5>
+                <h2 class="mb-0">{{ draft_acts }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">На согласовании</h5>
+                <h2 class="mb-0">{{ review_acts }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Подписано</h5>
+                <h2 class="mb-0">{{ approved_acts }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Оплачено</h5>
+                <h2 class="mb-0">{{ paid_acts }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <h5 class="card-title">Общая сумма</h5>
+                <h2 class="mb-0">{{ total_amount|floatformat:2 }} ₽</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние акты -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Последние акты</h5>
+        <a href="{% url 'create_act' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Создать акт
+        </a>
+    </div>
+    <div class="card-body">
+        {% if recent_acts %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дата</th>
+                        <th>Контрагент</th>
+                        <th>Объект</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for act in recent_acts %}
+                    <tr>
+                        <td>{{ act.number }}</td>
+                        <td>{{ act.date|date:"d.m.Y" }}</td>
+                        <td>{{ act.contract.contractor.name }}</td>
+                        <td>{{ act.object.name }}</td>
+                        <td>{{ act.total_amount|floatformat:2 }} ₽</td>
+                        <td>
+                            <span class="badge status-{{ act.status }}">
+                                {{ act.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'act_detail' act.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center">Акты ещё не созданы</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

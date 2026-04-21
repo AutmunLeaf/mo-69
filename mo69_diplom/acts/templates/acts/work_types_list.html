@@ -1,0 +1,49 @@
+{% extends 'acts/base.html' %}
+
+{% block title %}Виды работ - ООО «Мостоотряд-69»{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-list-task"></i> Виды работ</h2>
+    <a href="{% url 'admin:acts_worktype_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Добавить вид работ
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if work_types %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th>Код</th>
+                        <th>Ед. измерения</th>
+                        <th>Описание</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for work_type in work_types %}
+                    <tr>
+                        <td>{{ work_type.name }}</td>
+                        <td>{{ work_type.code|default:"-" }}</td>
+                        <td>{{ work_type.unit }}</td>
+                        <td>{{ work_type.description|default:"-"|truncatechars:50 }}</td>
+                        <td>
+                            <a href="{% url 'admin:acts_worktype_change' work_type.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center">Виды работ ещё не добавлены</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
