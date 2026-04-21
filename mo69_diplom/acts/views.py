@@ -12,8 +12,6 @@ from decimal import Decimal
 import json
 from io import BytesIO
 from xhtml2pdf.document import pisaDocument
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 
 from .models import Contractor, Object, WorkType, Contract, Act, ActItem
 from .forms import (
@@ -22,16 +20,6 @@ from .forms import (
 )
 from .xml_generator import generate_ks2_xml, generate_ks3_xml
 from .validators import validate_xml
-
-# Регистрация шрифта с поддержкой кириллицы (DejaVu Sans)
-FONT_PATH = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
-FONT_BOLD_PATH = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-
-try:
-    pdfmetrics.registerFont(TTFont('DejaVuSans', FONT_PATH))
-    pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', FONT_BOLD_PATH))
-except Exception:
-    pass  # Шрифт не найден, используем стандартный (может не поддерживать кириллицу)
 
 
 @login_required
@@ -138,14 +126,14 @@ def generate_ks2_pdf(request, pk):
     response['Content-Disposition'] = f'attachment; filename="KS-2_{act.number}.pdf"'
     
     # Конвертируем HTML в PDF с поддержкой кириллицы
-    doc = pisaDocument(
+    result = pisaDocument(
         BytesIO(html.encode('utf-8')),
         dest=response,
         encoding='utf-8',
     )
     
-    if doc.err:
-        return HttpResponse('Ошибка при генерации PDF', status=500)
+    if result.err:
+        return HttpResponse(f'Ошибка при генерации PDF: {result.err}', status=500)
     
     return response
 
@@ -169,14 +157,14 @@ def generate_ks3_pdf(request, pk):
     response['Content-Disposition'] = f'attachment; filename="KS-3_{act.number}.pdf"'
     
     # Конвертируем HTML в PDF с поддержкой кириллицы
-    doc = pisaDocument(
+    result = pisaDocument(
         BytesIO(html.encode('utf-8')),
         dest=response,
         encoding='utf-8',
     )
     
-    if doc.err:
-        return HttpResponse('Ошибка при генерации PDF', status=500)
+    if result.err:
+        return HttpResponse(f'Ошибка при генерации PDF: {result.err}', status=500)
     
     return response
 
